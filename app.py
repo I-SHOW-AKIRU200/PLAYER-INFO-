@@ -3,142 +3,151 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Function to fetch player stats from the external API
-def get_player_stats(uid, region):
-    api_key = "PRINCE-PERM-KEY"  # Hardcoded API key
+# API key for validation
+API_KEY = "AKIRU"
 
-    url = f'https://freefireinfoapiv2lk-team.vercel.app/api/playerstats?uid={uid}&region={region}&api_key={api_key}'
+# API URL for player information
+PLAYER_INFO_URL = "https://freefireinfoapiv2lk-team.vercel.app/api/playerstats"
+WISHLIST_API_URL = "https://ariflex-labs-wishlist-api.vercel.app/items_info"
+
+# Function to fetch player info
+def get_player_info(uid, region):
+    api_key = "PRINCE-PERM-KEY"
+    url = f"{PLAYER_INFO_URL}?uid={uid}&region={region}&api_key={api_key}"
     
     try:
-        res = requests.get(url)
-        if res.status_code != 200:
-            return {"error": "Failed to fetch player stats"}
-        
-        player_data = res.json()
-
-        # Extract credit at the top of the response
-        credit = player_data.get("I_SHOW_AKIRU", "N/A")
-
-        # Add your Telegram username and YouTube channel link
-        telegram_username = "@I_SHOW_AKIRU"  # Replace with your actual Telegram username
-        youtube_channel_link = "https://youtube.com/@ishowakiru?si=a_-y0-KOSBjHUu3a"  # Replace with your actual YouTube channel link
-
-        # Formatting the response
-        response = {
-            "credit": credit,  # Credit at the top
-            "telegram_username": telegram_username,
-            "youtube_channel": youtube_channel_link,
-            "AccountInfo": {
-                "AccountAvatarId": player_data.get("AccountInfo", {}).get("AccountAvatarId", "N/A"),
-                "AccountBPBadges": player_data.get("AccountInfo", {}).get("AccountBPBadges", "N/A"),
-                "AccountBPID": player_data.get("AccountInfo", {}).get("AccountBPID", "N/A"),
-                "AccountBannerId": player_data.get("AccountInfo", {}).get("AccountBannerId", "N/A"),
-                "AccountCreateTime": player_data.get("AccountInfo", {}).get("AccountCreateTime", "N/A"),
-                "AccountEXP": player_data.get("AccountInfo", {}).get("AccountEXP", "N/A"),
-                "AccountLastLogin": player_data.get("AccountInfo", {}).get("AccountLastLogin", "N/A"),
-                "AccountLevel": player_data.get("AccountInfo", {}).get("AccountLevel", "N/A"),
-                "AccountLikes": player_data.get("AccountInfo", {}).get("AccountLikes", "N/A"),
-                "AccountName": player_data.get("AccountInfo", {}).get("AccountName", "N/A"),
-                "AccountRegion": player_data.get("AccountInfo", {}).get("AccountRegion", "N/A"),
-                "AccountSeasonId": player_data.get("AccountInfo", {}).get("AccountSeasonId", "N/A"),
-                "AccountType": player_data.get("AccountInfo", {}).get("AccountType", "N/A"),
-                "BrMaxRank": player_data.get("AccountInfo", {}).get("BrMaxRank", "N/A"),
-                "BrRankPoint": player_data.get("AccountInfo", {}).get("BrRankPoint", "N/A"),
-                "CsMaxRank": player_data.get("AccountInfo", {}).get("CsMaxRank", "N/A"),
-                "CsRankPoint": player_data.get("AccountInfo", {}).get("CsRankPoint", "N/A"),
-                "EquippedWeapon": player_data.get("AccountInfo", {}).get("EquippedWeapon", "N/A"),
-                "EquippedWeaponImages": player_data.get("AccountInfo", {}).get("EquippedWeaponImages", "N/A"),
-                "ReleaseVersion": player_data.get("AccountInfo", {}).get("ReleaseVersion", "N/A"),
-                "Role": player_data.get("AccountInfo", {}).get("Role", "N/A"),
-                "ShowBrRank": player_data.get("AccountInfo", {}).get("ShowBrRank", "N/A"),
-                "ShowCsRank": player_data.get("AccountInfo", {}).get("ShowCsRank", "N/A"),
-                "Title": player_data.get("AccountInfo", {}).get("Title", "N/A"),
-                "hasElitePass": player_data.get("AccountInfo", {}).get("hasElitePass", "N/A"),
-            },
-            "AccountProfileInfo": {
-                "EquippedOutfit": player_data.get("AccountProfileInfo", {}).get("EquippedOutfit", "N/A"),
-                "EquippedOutfitImages": player_data.get("AccountProfileInfo", {}).get("EquippedOutfitImages", "N/A"),
-                "EquippedSkills": player_data.get("AccountProfileInfo", {}).get("EquippedSkills", "N/A")
-            },
-            "GuildInfo": {
-                "GuildCapacity": player_data.get("GuildInfo", {}).get("GuildCapacity", "N/A"),
-                "GuildID": player_data.get("GuildInfo", {}).get("GuildID", "N/A"),
-                "GuildLevel": player_data.get("GuildInfo", {}).get("GuildLevel", "N/A"),
-                "GuildMember": player_data.get("GuildInfo", {}).get("GuildMember", "N/A"),
-                "GuildName": player_data.get("GuildInfo", {}).get("GuildName", "N/A"),
-                "GuildOwner": player_data.get("GuildInfo", {}).get("GuildOwner", "N/A")
-            },
-            "captainBasicInfo": {
-                "AvatarImage": player_data.get("captainBasicInfo", {}).get("AvatarImage", "N/A"),
-                "BannerImage": player_data.get("captainBasicInfo", {}).get("BannerImage", "N/A"),
-                "EquippedWeapon": player_data.get("captainBasicInfo", {}).get("EquippedWeapon", "N/A"),
-                "accountId": player_data.get("captainBasicInfo", {}).get("accountId", "N/A"),
-                "accountType": player_data.get("captainBasicInfo", {}).get("accountType", "N/A"),
-                "badgeCnt": player_data.get("captainBasicInfo", {}).get("badgeCnt", "N/A"),
-                "badgeId": player_data.get("captainBasicInfo", {}).get("badgeId", "N/A"),
-                "bannerId": player_data.get("captainBasicInfo", {}).get("bannerId", "N/A"),
-                "createAt": player_data.get("captainBasicInfo", {}).get("createAt", "N/A"),
-                "csMaxRank": player_data.get("captainBasicInfo", {}).get("csMaxRank", "N/A"),
-                "csRank": player_data.get("captainBasicInfo", {}).get("csRank", "N/A"),
-                "csRankingPoints": player_data.get("captainBasicInfo", {}).get("csRankingPoints", "N/A"),
-                "exp": player_data.get("captainBasicInfo", {}).get("exp", "N/A"),
-                "headPic": player_data.get("captainBasicInfo", {}).get("headPic", "N/A"),
-                "lastLoginAt": player_data.get("captainBasicInfo", {}).get("lastLoginAt", "N/A"),
-                "level": player_data.get("captainBasicInfo", {}).get("level", "N/A"),
-                "liked": player_data.get("captainBasicInfo", {}).get("liked", "N/A"),
-                "maxRank": player_data.get("captainBasicInfo", {}).get("maxRank", "N/A"),
-                "nickname": player_data.get("captainBasicInfo", {}).get("nickname", "N/A"),
-                "pinId": player_data.get("captainBasicInfo", {}).get("pinId", "N/A"),
-                "rank": player_data.get("captainBasicInfo", {}).get("rank", "N/A"),
-                "rankingPoints": player_data.get("captainBasicInfo", {}).get("rankingPoints", "N/A"),
-                "region": player_data.get("captainBasicInfo", {}).get("region", "N/A"),
-                "releaseVersion": player_data.get("captainBasicInfo", {}).get("releaseVersion", "N/A"),
-                "seasonId": player_data.get("captainBasicInfo", {}).get("seasonId", "N/A"),
-                "showBrRank": player_data.get("captainBasicInfo", {}).get("showBrRank", "N/A"),
-                "showCsRank": player_data.get("captainBasicInfo", {}).get("showCsRank", "N/A"),
-                "title": player_data.get("captainBasicInfo", {}).get("title", "N/A")
-            },
-            "creditScoreInfo": {
-                "creditScore": player_data.get("creditScoreInfo", {}).get("creditScore"),
-                "periodicSummaryEndTime": player_data.get("creditScoreInfo", {}).get("periodicSummaryEndTime", "N/A"),
-                "periodicSummaryStartTime": player_data.get("creditScoreInfo", {}).get("periodicSummaryStartTime", "N/A"),
-                "rewardState": player_data.get("creditScoreInfo", {}).get("rewardState", "N/A")
-            },
-            "petInfo": {
-                "exp": player_data.get("petInfo", {}).get("exp", "N/A"),
-                "id": player_data.get("petInfo", {}).get("id", "N/A"),
-                "isSelected": player_data.get("petInfo", {}).get("isSelected", "N/A"),
-                "level": player_data.get("petInfo", {}).get("level", "N/A"),
-                "name": player_data.get("petInfo", {}).get("name", "N/A"),
-                "selectedSkillId": player_data.get("petInfo", {}).get("selectedSkillId", "N/A"),
-                "skinId": player_data.get("petInfo", {}).get("skinId", "N/A")
-            },
-            "socialinfo": {
-                "AccountLanguage": player_data.get("socialinfo", {}).get("AccountLanguage", "N/A"),
-                "AccountPreferMode": player_data.get("socialinfo", {}).get("AccountPreferMode", "N/A"),
-                "AccountSignature": player_data.get("socialinfo", {}).get("AccountSignature", "N/A")
-            }
-        }
-        
-        return response
-
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return {"error": "Failed to fetch player information."}
     except requests.exceptions.RequestException as e:
         return {"error": str(e)}
 
-@app.route('/AKIRU_info', methods=['GET'])
-def player_info():
-    player_uid = request.args.get('player_uid')
-    region = request.args.get('region')
+# Function to fetch wishlist info
+def get_wishlist(uid, region):
+    url = f"{WISHLIST_API_URL}?uid={uid}&region={region}"
+    
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return {"error": "Failed to fetch wishlist information."}
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
 
-    if not player_uid or not region:
-        return jsonify({"error": "Player UID and region are required"}), 400
+# Combined API endpoint
+@app.route('/AKIRU-INFO-API', methods=['GET'])
+def akiru_info_api():
+    # Extracting parameters from the request URL
+    uid = request.args.get('UID')
+    region = request.args.get('REGION')
+    key = request.args.get('key')
 
-    player_info = get_player_stats(player_uid, region)
+    # Validate API key
+    if key != API_KEY:
+        return jsonify({"error": "Invalid API key."}), 403
 
-    if "error" in player_info:
-        return jsonify(player_info), 500
+    # Fetch player info
+    player_info = get_player_info(uid, region)
+    
+    # Fetch wishlist info
+    wishlist_info = get_wishlist(uid, region)
 
-    return jsonify(player_info)
+    # Assuming player_info and wishlist_info are structured as per the requested response
+    account_info = player_info.get("AccountInfo", {})
+    captain_info = player_info.get("captainBasicInfo", {})
+    guild_info = player_info.get("GuildInfo", {})
+    social_info = player_info.get("socialinfo", {})
+    pet_info = player_info.get("petInfo", {})
+    wishlist_items = wishlist_info.get("items", [])
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)  # No SSL
+    response_data = {
+        "AccountInfo": {
+            "AccountAvatarId": account_info.get("AccountAvatarId", ""),
+            "AccountBPBadges": account_info.get("AccountBPBadges", ""),
+            "AccountBPID": account_info.get("AccountBPID", ""),
+            "AccountBannerId": account_info.get("AccountBannerId", ""),
+            "AccountCreateTime": account_info.get("AccountCreateTime", ""),
+            "AccountEXP": account_info.get("AccountEXP", ""),
+            "AccountLastLogin": account_info.get("AccountLastLogin", ""),
+            "AccountLevel": account_info.get("AccountLevel", ""),
+            "AccountLikes": account_info.get("AccountLikes", ""),
+            "AccountName": account_info.get("AccountName", ""),
+            "AccountRegion": account_info.get("AccountRegion", ""),
+            "AccountSeasonId": account_info.get("AccountSeasonId", ""),
+            "AccountType": account_info.get("AccountType", ""),
+            "BrMaxRank": account_info.get("BrMaxRank", ""),
+            "BrRankPoint": account_info.get("BrRankPoint", ""),
+            "CsMaxRank": account_info.get("CsMaxRank", ""),
+            "CsRankPoint": account_info.get("CsRankPoint", ""),
+            "EquippedWeapon": account_info.get("EquippedWeapon", []),
+            "EquippedWeaponImages": [f"https://ff-community-api.vercel.app/icons?id={weapon_id}" for weapon_id in account_info.get("EquippedWeapon", [])],
+            "ReleaseVersion": account_info.get("ReleaseVersion", ""),
+            "Role": account_info.get("Role", ""),
+            "ShowBrRank": account_info.get("ShowBrRank", ""),
+            "ShowCsRank": account_info.get("ShowCsRank", ""),
+            "Title": account_info.get("Title", ""),
+            "hasElitePass": account_info.get("hasElitePass", False)
+        },
+        "AccountProfileInfo": {
+            "EquippedOutfit": account_info.get("EquippedOutfit", []),
+            "EquippedOutfitImages": [f"https://ff-community-api.vercel.app/icons?id={outfit_id}" for outfit_id in account_info.get("EquippedOutfit", [])],
+            "EquippedSkills": account_info.get("EquippedSkills", []),
+            "EquippedSkillsImages": account_info.get("EquippedSkillsImages", [])
+        },
+        "GuildInfo": {
+            "GuildCapacity": guild_info.get("GuildCapacity", ""),
+            "GuildID": guild_info.get("GuildID", ""),
+            "GuildLevel": guild_info.get("GuildLevel", ""),
+            "GuildMember": guild_info.get("GuildMember", ""),
+            "GuildName": guild_info.get("GuildName", ""),
+            "GuildOwner": guild_info.get("GuildOwner", "")
+        },
+        "OXX3JMXgOb": captain_info.get("nickname", ""),
+        "captainBasicInfo": {
+            "AvatarImage": f"https://ff-community-api.vercel.app/icons?id={captain_info.get('AvatarImage', '')}",
+            "BannerImage": f"https://ff-community-api.vercel.app/icons?id={captain_info.get('BannerImage', '')}",
+            "EquippedWeapon": captain_info.get("EquippedWeapon", []),
+            "accountId": captain_info.get("accountId", ""),
+            "accountType": captain_info.get("accountType", ""),
+            "badgeCnt": captain_info.get("badgeCnt", ""),
+            "badgeId": captain_info.get("badgeId", ""),
+            "bannerId": captain_info.get("bannerId", ""),
+            "createAt": captain_info.get("createAt", ""),
+            "csMaxRank": captain_info.get("csMaxRank", ""),
+            "csRank": captain_info.get("csRank", ""),
+            "csRankingPoints": captain_info.get("csRankingPoints", ""),
+            "exp": captain_info.get("exp", ""),
+            "headPic": captain_info.get("headPic", ""),
+            "lastLoginAt": captain_info.get("lastLoginAt", ""),
+            "level": captain_info.get("level", ""),
+            "liked": captain_info.get("liked", ""),
+            "maxRank": captain_info.get("maxRank", ""),
+            "nickname": captain_info.get("nickname", ""),
+            "pinId": captain_info.get("pinId", ""),
+            "rank": captain_info.get("rank", ""),
+            "rankingPoints": captain_info.get("rankingPoints", ""),
+            "region": captain_info.get("region", ""),
+            "releaseVersion": captain_info.get("releaseVersion", ""),
+            "seasonId": captain_info.get("seasonId", ""),
+            "showBrRank": captain_info.get("showBrRank", ""),
+            "showCsRank": captain_info.get("showCsRank", ""),
+            "title": captain_info.get("title", "")
+        },
+        "creditScoreInfo": {
+            "creditScore": captain_info.get("creditScore", ""),
+            "periodicSummaryEndTime": captain_info.get("periodicSummaryEndTime", ""),
+            "periodicSummaryStartTime": captain_info.get("periodicSummaryStartTime", ""),
+            "rewardState": captain_info.get("rewardState", "")
+        },
+        "petInfo": pet_info,
+        "socialinfo": social_info,
+        "Wishlist_items": wishlist_items
+    }
+    
+    return jsonify(response_data)
+
+if __name__ == "__main__":
+    app.run(debug=True)
